@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package goproto.protoc.proto3;
+
+option go_package = "./message/pb";
+
+enum MsgType {
+    MSG_UNKNOWN = 0;
+    MSG_ECHO_REQ = 1001;
+    MSG_ECHO_RES = 1002;
+}
+
+message EchoReq {
+    string data = 1;
+}
+
+message EchoRes {
+    string data = 1;
+}
