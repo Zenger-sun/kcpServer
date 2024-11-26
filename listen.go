@@ -2,14 +2,17 @@ package context
 
 import (
 	"crypto/sha256"
+	"kcpServer/message/pb"
 	"log/slog"
 	"os"
-
-	"kcpServer/message/pb"
 
 	"github.com/xtaci/kcp-go"
 	"golang.org/x/crypto/pbkdf2"
 	"google.golang.org/protobuf/proto"
+)
+
+const (
+	BUFFER_LEN = 4 * 1024 * 1024
 )
 
 func listen(ctx *Context) error {
@@ -18,6 +21,7 @@ func listen(ctx *Context) error {
 
 	listener, err := kcp.ListenWithOptions(ctx.Addr, block, 10, 3)
 	if err != nil {
+		slog.Error("Failed to listen addr[%v], err: %v", ctx.Addr, err)
 		os.Exit(1)
 	}
 
@@ -31,8 +35,8 @@ func listen(ctx *Context) error {
 		session.SetNoDelay(1, 10, 2, 1)
 		session.SetStreamMode(true)
 		session.SetWindowSize(4096, 4096)
-		session.SetReadBuffer(4 * 1024 * 1024)
-		session.SetWriteBuffer(4 * 1024 * 1024)
+		session.SetReadBuffer(BUFFER_LEN)
+		session.SetWriteBuffer(BUFFER_LEN)
 		session.SetACKNoDelay(true)
 
 		go readKcp(session, ctx)
@@ -40,14 +44,12 @@ func listen(ctx *Context) error {
 }
 
 func readKcp(session *kcp.UDPSession, ctx *Context) {
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, BUFFER_LEN)
 	defer session.Close()
 
 	for {
 		_, err := session.Read(buffer)
-		switch err {
-		case nil:
-		default:
+		if err != nil {
 			return
 		}
 
@@ -56,13 +58,13 @@ func readKcp(session *kcp.UDPSession, ctx *Context) {
 			slog.Warn("readKCP unpack msg err: ", err)
 			continue
 		}
-		pack.Session = session
 
 		handler, ok := ctx.Router.Handler[pb.MsgType(pack.Head.MsgType)]
 		if !ok {
 			continue
 		}
 
+		pack.Session = session
 		err = handler(pack, ctx)
 		if err != nil {
 			slog.Warn("handler err: ", err)

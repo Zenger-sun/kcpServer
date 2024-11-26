@@ -58,7 +58,7 @@ func UnpackMsg(data []byte) (pack *Packet, err error) {
 
 func PackMsg(head *Head, message proto.Message) []byte {
 	msg, _ := proto.Marshal(message)
-	head.Len = uint32(len(msg))
+	head.Len = HEAD_LEN + uint32(len(msg))
 
 	buff := new(bytes.Buffer)
 	binary.Write(buff, binary.LittleEndian, head.Len)
