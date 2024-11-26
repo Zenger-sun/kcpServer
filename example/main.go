@@ -39,8 +39,6 @@ func (e *Echo) handleEcho(msg *context.Packet) {
 		return
 	}
 
-	slog.Info("receive new echo", "req", req.GetData())
-
 	res := &pb.EchoRes{Data: req.GetData()}
 	e.ctx.Response(msg.Session, pb.MsgType_MSG_ECHO_RES, res)
 
