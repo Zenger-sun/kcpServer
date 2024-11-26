@@ -39,9 +39,9 @@ func (ctx *Context) Shutdown() {
 }
 
 func NewContext(conf *Conf) *Context {
-	sync := &Context{
+	ctx := &Context{
 		Conf:   conf,
 		Router: NewRouter(),
 	}
-	return sync
+	return ctx
 }

@@ -59,17 +59,8 @@ func readKcp(session *kcp.UDPSession, ctx *Context) {
 			continue
 		}
 
-		handler, ok := ctx.Router.Handler[pb.MsgType(pack.Head.MsgType)]
-		if !ok {
-			continue
-		}
-
 		pack.Session = session
-		err = handler(pack, ctx)
-		if err != nil {
-			slog.Warn("handler err: ", err)
-			continue
-		}
+		ctx.Send(ctx.Pid(), pack)
 	}
 }
 

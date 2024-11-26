@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	SERVER_ADDR = "127.0.0.1:8080"
+	SERVER_ADDR = "127.0.0.1:8081"
 	SERVER_PASS = "JKwfwA051x"
 	SERVER_SALT = "test"
 )
