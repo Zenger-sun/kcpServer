@@ -59,6 +59,47 @@ func TestClinet_Echo(t *testing.T) {
 	}
 }
 
+func TestClinet_EchoNil(t *testing.T) {
+	key := pbkdf2.Key([]byte(SERVER_PASS), []byte(SERVER_SALT), 1024, 32, sha256.New)
+	block, _ := kcp.NewAESBlockCrypt(key)
+
+	sess, err := kcp.DialWithOptions(SERVER_ADDR, block, 10, 3)
+	if err != nil {
+		return
+	}
+	defer sess.Close()
+
+	head := &context.Head{MsgType: uint16(pb.MsgType_MSG_ECHO_REQ)}
+	msg := &pb.EchoReq{Data: "test nil"}
+
+	_, err = sess.Write(context.PackMsg(head, msg))
+	if err != nil {
+		return
+	}
+
+	pack := make([]byte, 1024)
+	for {
+		_, err := sess.Read(pack)
+		if err != nil {
+			continue
+		}
+
+		packet, err := context.UnpackMsg(pack)
+		if err != nil {
+			return
+		}
+
+		res := packet.Msg.(*pb.EchoRes)
+		if res == nil {
+			return
+		}
+
+		fmt.Println(head.MsgType, res.Data)
+
+		break
+	}
+}
+
 func BenchmarkClient(t *testing.B) {
 	key := pbkdf2.Key([]byte(SERVER_PASS), []byte("test"), 1024, 32, sha256.New)
 	block, _ := kcp.NewAESBlockCrypt(key)

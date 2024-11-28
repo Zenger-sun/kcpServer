@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log/slog"
 
 	"kcpServer"
@@ -37,6 +38,11 @@ func (e *Echo) handleEcho(msg *context.Packet) {
 	req := msg.Msg.(*pb.EchoReq)
 	if req == nil {
 		return
+	}
+
+	if req.GetData() == "test nil" {
+		var res *pb.EchoRes
+		fmt.Println(res.Data)
 	}
 
 	res := &pb.EchoRes{Data: req.GetData()}
